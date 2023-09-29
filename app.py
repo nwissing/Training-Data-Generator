@@ -194,7 +194,7 @@ def seg_image_point():
 
 @app.route('/download_npy', methods=['GET'])
 def download_npy():
-    # Read the OUTPUTimage.npy file from the server
+    # Read the OUTPUTimage.npy file from the directory
         with open('OUTPUTimage.npy', 'rb') as npy_file:
             # Return the .npy file as a byte stream with appropriate MIME type
             response = send_file(
@@ -206,7 +206,7 @@ def download_npy():
 
 @app.route('/download_mask_npy', methods=['GET'])
 def download_mask_npy():
-    # Read the OUTPUTimage.npy file from the server
+    # Read the OUTPUTmask.npy file from the directory
         with open('OUTPUTmask.npy', 'rb') as npy_file:
             # Return the .npy file as a byte stream with appropriate MIME type
             response = send_file(
