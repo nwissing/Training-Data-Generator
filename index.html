@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Data Generator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <style>
+        #map-container {
+            display: flex;
+        }
+
+        #map {
+            flex: 1;
+            height: 98vh;
+        }
+
+        #mode-menu {
+            width: 250px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 98vh;
+            background-color: #F5F5F5
+        }
+
+        #mode-menu input[type="radio"] {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        #popupWindowCall {
+            margin-top: auto;
+            margin-bottom: auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            width: 209px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 1px;
+        }
+
+        #popupWindowCall:hover {
+            background-color: #0056b3;
+        }
+
+        #mode-radio {
+            text-align: left;
+            padding-left: 5px;
+            margin-bottom: 200px;
+        }
+
+        .indented-radio {
+            margin-left: 25px;
+        }
+
+        #user-input {
+            margin-bottom: 30px;
+            font-size: 23px;
+            text-align: center;
+            color: #333;
+        }
+
+        #popup-container {
+            text-align: center;
+            font-size: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            width: 1012px;
+            height: 800px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            z-index: 9998;
+        }
+
+        #popup-content {
+            padding: 15px;
+            display: flex;
+            height: 768px;
+            width: 968px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #popup-menu button {
+            margin: 10px 0;
+            width: 180px;
+            height: 35px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #popup-menu button:hover {
+            background-color: #0056b3;
+        }
+
+        #popup-map {
+            width: 768px;
+            height: 768px;
+            background-color: rgb(204, 204, 204);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            border: 2px solid #000000;
+        }
+        
+        .pointB {
+            width: 7px;
+            height: 7px;
+            background: linear-gradient(45deg, #3498db, #2980b9); 
+            box-shadow: 0 0 5px rgba(52, 152, 255, 0.7); 
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: background 0.3s, box-shadow 0.3s;
+            border: 1px solid white;
+        }
+
+        .pointR {
+            width: 7px;
+            height: 7px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b); 
+            box-shadow: 0 0 5px rgba(231, 76, 60, 0.7); 
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: background 0.3s, box-shadow 0.3s;
+            border: 1px solid white;
+        }
+
+        #popup-menu {
+            width: 200px;
+            height: 768px;
+            background-color: #F5F5F5; 
+            flex-direction: column;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            right: 25px;
+            border-top: 2px solid #000000;
+            border-bottom: 2px solid #000000;
+            border-right: 2px solid #000000;
+        }
+
+        #uploadedImage {
+            background-color: #333333;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 9999;
+        }
+        #loadingText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 20px;
+        }
+
+        #quickGuide-container {
+            text-align: center;
+            font-size: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            width: 600px;
+            height: 350px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            z-index: 9997;
+        }
+
+        #quickGuide-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 330px;
+            width: 580px;
+            align-items: center;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        #close-button2 {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #quickGuideCall {
+            margin-top: auto;
+            margin-bottom: auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            width: 209px;
+            background-color: #B0B0B0;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        #quickGuideCall:hover {
+            background-color: #9E9E9E;
+        }
+
+        .menu-button {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Starting Page -->
+    <div id="map-container">
+        <div id="map"></div>
+        <div id="mode-menu">
+            <div id="user-input"></div>
+            <button id="popupWindowCall" class="menu-button"> Area has been selected</button>
+            <button id="quickGuideCall" class="menu-button">QuickGuide</button>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay">
+        <div id="loadingText">Loading...</div>
+    </div>
+
+    <!-- Popup Window -->
+    <div id="popup-container" style="display: none;">
+        <div id="popup-content">
+            <span id="close-button">&times;</span>
+            <div id="popup-map">
+                <img id="uploadedImage" src="#" alt="wait a few seconds" style="max-width: 768px; max-height: 768px;">
+            </div>
+            <div id="popup-menu">
+                <div id="mode-radio">
+                    Select prompt type:<br>
+                    <input type="radio" id="mode-mod1" name="mode" value="mod1" checked>
+                    <label for="mode-mod1">Point</label><br>
+                    
+                    <input type="radio" id="node-mod1-fore" name="node" value="fore" class="indented-radio" checked disabled>
+                    <label for="node-mod1-fore">Foreground</label><br>
+                    <input type="radio" id="node-mod1-back" name="node" value="back" class="indented-radio" disabled>
+                    <label for="node-mod1-back">Background</label><br>
+                
+                    <input type="radio" id="mode-mod2" name="mode" value="mod2">
+                    <label for="mode-mod2">Box</label><br>
+                </div>
+                <button id="btn_segmented_image">Segment Image!</button>
+                <button id="clearPrompts">Clear Prompts</button>
+                <br>
+                <br>
+                <button id="download-button-1">Download as jpg</button>
+                <button id="download-button-2">Download as npy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QuickGuide -->
+    <div id="quickGuide-container" style="display: none;">
+        <div id="quickGuide-content">
+            <span id="close-button2">&times;</span>
+            Follow the steps below to use this web application correctly:<br> <br>
+            <ul>
+                <li><strong>Step 1:</strong> move the map to a desired location</li>
+                <li><strong>Step 2:</strong> click "Area has been selected"</li>
+                <li><strong>Step 3:</strong> choose Prompt type via the radio buttons</li>
+                <li><strong>Step 4:</strong> insert Prompts directly on the image</li>
+                <li><strong>Step 5:</strong> click "Segment Image!"</li>
+                <li><strong>Step 6:</strong> click on one of the downloadbuttons</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-easyprint"></script>
+
+    <script>
+        // Map initialization
+        var map = L.map('map').setView([51.95421, 7], 13);
+
+        // load API-Key
+        $.ajax({
+            url: 'http://localhost:8082/get-api-key',
+            type: 'GET',
+            success: function(data) {
+                // api_key als globale Variable setzen
+                window.api_key = data.api_key;
+
+                // Mapbox Satellite layer
+                L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+                    attribution: 'Map data &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
+                    maxZoom: 18,
+                    id: 'mapbox/satellite-v9', // Satellite view
+                    tileSize: 512,
+                    zoomOffset: -1,
+                    accessToken: window.api_key 
+                }).addTo(map);
+            },
+            error: function(error) {
+                console.error('API-Key Error:', error);
+            }
+        });
+
+        
+
+
+        // Handle mode/node selection change
+        var modeSelect = document.querySelectorAll('input[name="mode"]');
+        var nodeSelect = document.querySelectorAll('input[name="node"]'); 
+
+        // Default mode
+        var currentMode = 'mod1';
+        var currentPointMode = 'fore'; 
+
+        // Radio-Buttons for Prompt Selection
+        modeSelect.forEach(function(radio) {
+            radio.addEventListener('change', function () {
+                currentMode = this.value;
+
+            // Clear existing markers or box based on the selected mode
+            if (currentMode === 'mod1') {
+                if (drawnBox) {
+                    popupmap.removeChild(drawnBox);
+                    drawnBox = null;
+                }
+                inputBox = [0,0,0,0];
+                if(currentPointMode === 'fore'){
+                    console.log("Mode Blue");
+                }
+                else if (currentPointMode === 'back')
+                {
+                    console.log("Mode Red");
+                }
+            } else if (currentMode === 'mod2') {
+                var points = document.querySelectorAll('#popup-map .pointB');
+                    points.forEach(function (point) {
+                        point.remove();
+                    });
+                    pointsArray = [];
+                    pointsLabel = [];  
+
+                points = document.querySelectorAll('#popup-map .pointR');
+                    points.forEach(function (point) {
+                        point.remove();
+                    });
+                    pointsArray = [];
+                    pointsLabel = []; 
+                } 
+            });
+        });
+
+        nodeSelect.forEach(function(radio) {
+            radio.addEventListener('change', function () {
+                currentPointMode = this.value;
+            });
+        });
+
+        //Disable the Fore/Background Radio buttons if mode 2 is active
+        $(document).ready(function(){
+            if($('#mode-mod1').is(":checked")) {
+                $('#node-mod1-fore, #node-mod1-back').prop('disabled', false);
+            } else {
+                $('#node-mod1-fore, #node-mod1-back').prop('disabled', true);
+            }
+            $('#mode-mod1').on('change', function(){
+                if($(this).is(":checked")) {
+                    $('#node-mod1-fore, #node-mod1-back').prop('disabled', false);
+                }
+            });
+
+            $('#mode-mod2').on('change', function(){
+                if($(this).is(":checked")) {
+                    $('#node-mod1-fore, #node-mod1-back').prop('disabled', true);
+                }
+            });
+        });
+
+        // Assigns multiple DOM elements
+        const popupContainer = document.getElementById('popup-container');
+        const quickGuideContainer = document.getElementById('quickGuide-container');
+        const closeButton = document.getElementById('close-button');
+        const closeButton2 = document.getElementById('close-button2');
+        const clearPrompts = document.getElementById('clearPrompts');
+        const btn_segmented_image = document.getElementById('btn_segmented_image');
+        const downloadButton1 = document.getElementById('download-button-1');
+        const downloadButton2 = document.getElementById('download-button-2');
+        const maskButton = document.getElementById('popupWindowCall');
+        const quickGuideButton = document.getElementById('quickGuideCall');
+        const popupmap = document.getElementById('popup-map');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        let pointsArray = []; // Array to store the points
+        let pointsLabel = []; // Array to store the label (foreground=1 / background=0)
+        let currentBlobUrl = null;
+
+        let firstClick = null;
+        let secondClick = null;
+        var drawnBox = document.createElement('div');
+
+        // Leaflet easyPrint-Plugin-Initialisierung
+        var printer = L.easyPrint({
+            sizeModes: ['Current'],
+            filename: 'leaflet-map',
+            hidden: true,
+            exportOnly: true,
+            hideControlContainer: true,
+            tileSize: 768,
+        }).addTo(map);
+
+        var extractedImage = new Image();
+        var extractedImageBlob;
+
+        maskButton.addEventListener('click', function () {
+            // Show Popup Window
+            popupContainer.style.display = 'block';
+
+            // Get the static image of the current position
+            // This static image is used for the segmentation 
+            var bounds = map.getBounds();
+            var width = map.getSize().x;
+            var height = map.getSize().y;
+
+            var apiKey = window.api_key;
+            var imageUrl = `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${bounds.getCenter().lng},${bounds.getCenter().lat},${map.getZoom() - 1}/${768}x${768}?access_token=${apiKey}`;
+
+            
+            var img = new Image();
+            img.crossOrigin = "Anonymous";  
+            img.onload = function() {
+                var canvas = document.createElement("canvas");
+                canvas.width = this.width;
+                canvas.height = this.height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(this, 0, 0);
+
+                canvas.toBlob(function(blob) {
+                    var blobUrl = URL.createObjectURL(blob);
+
+                    extractedImage.src = blobUrl;
+                    extractedImageBlob = blob;
+                    extractedImage.src = blobUrl;
+
+                    document.body.appendChild(extractedImage); 
+
+                }, 'image/jpg')
+                uploadedImage.src = imageUrl;
+            };
+            img.src = imageUrl;
+        }); 
+
+        quickGuideButton.addEventListener('click', function () {
+            quickGuideContainer.style.display = 'block';
+        });
+        
+        btn_segmented_image.addEventListener('click', function () {
+
+            const imageFile = extractedImageBlob;
+            
+            // Either send an api call to the backend to segment the image with points or with the box
+            if (currentMode === 'mod1') {
+
+                //Check if at least 8 points was drawn on the image
+                if (pointsArray.length < 8) {
+                    alert("Please set at least 8 points!");
+                    return; 
+                }
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                formData.append('input_points', JSON.stringify(pointsArray));
+                formData.append('input_labels', JSON.stringify(pointsLabel));
+
+                // Send a POST request with the FormData to the backend API
+                $.ajax({
+                    url: 'http://localhost:8082/seg_image/point',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        // Show loading overlay
+                        loadingOverlay.style.display = 'block';
+                    },
+                    success: function(data) {
+                        // Hide the loading overlay
+                        loadingOverlay.style.display = 'none';
+
+                        // Update the image source
+                        uploadedImage.src = 'data:image/png;base64,' + data.image;
+
+                        // Delete current points
+                        var points = document.querySelectorAll('#popup-map .pointB');
+                            points.forEach(function (point) {
+                                point.remove();
+                            });
+
+                        points = document.querySelectorAll('#popup-map .pointR');
+                            points.forEach(function (point) {
+                                point.remove();
+                            });
+                            pointsArray = [];
+                            pointsLabel = []; 
+                    },
+                    error: function(error) {
+                        // Hide the loading overlay
+                        loadingOverlay.style.display = 'none';
+
+                        console.error('API Error:', error);
+                    }
+                });
+            }
+            else if (currentMode === 'mod2') {
+                
+                //Check if a bow was drawn on the image
+                var boxes = document.querySelectorAll("div[style*='border: 3px solid rgba(52, 152, 255, 0.7)']");
+
+                if (boxes.length === 0) {
+                    alert("Please draw in a box on the image!");
+                    return;  
+                }
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                formData.append('input_box', JSON.stringify(inputBox))
+
+                // Send a POST request with the FormData to the backend API
+                $.ajax({
+                    url: 'http://localhost:8082/seg_image/box',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        // Show loading overlay
+                        loadingOverlay.style.display = 'block';
+                    },
+                    success: function(data) {
+                        // Hide the loading overlay
+                        loadingOverlay.style.display = 'none';
+
+                        // Update the image source
+                        uploadedImage.src = 'data:image/png;base64,' + data.image;
+                        
+                        //Delete current points
+                        if (drawnBox.parentNode === popupmap) {
+                            popupmap.removeChild(drawnBox);
+                            drawnBox = null;
+                        }
+                        inputBox = [-1,-1,-1,-1];
+                    },
+                    error: function(error) {
+                        // Hide the loading overlay
+                        loadingOverlay.style.display = 'none';
+
+                        console.error('API Error:', error);
+                    }
+                });
+            }
+        });
+
+        popupmap.addEventListener('click', function(e) {
+            //Draws the points/box after left mouse click on the image
+            if (currentMode === 'mod1') {
+                // Draw points in the popup map container
+                var point = document.createElement('div');
+                if (currentPointMode === 'fore') {
+                    // Push a Foreground-point
+                    point.className = 'pointB';
+                    pointsLabel.push(1)
+                }
+                else if (currentPointMode === 'back')
+                {
+                    // Push a Background-point
+                    point.className = 'pointR';
+                    pointsLabel.push(0)
+                }
+                
+                point.style.left = e.offsetX + 'px';
+                point.style.top = e.offsetY + 'px';
+                popupmap.appendChild(point);
+
+                var pointCoordinates = {
+                    x: e.offsetX,
+                    y: e.offsetY
+                };
+                pointsArray.push(pointCoordinates);
+            } else if (currentMode === 'mod2') {
+                drawnBox = document.createElement('div');
+                drawnBox.style.position = 'absolute';
+                drawnBox.style.border = '3px solid rgba(52, 152, 255, 0.7)';
+                if (!firstClick) {
+                    firstClick = {
+                        x: e.offsetX,
+                        y: e.offsetY
+                    };
+                } else if (!secondClick) {
+                    secondClick = {
+                        x: e.offsetX,
+                        y: e.offsetY
+                    };
+
+                    // Draw the Box
+                    var width = Math.abs(secondClick.x - firstClick.x);
+                    var height = Math.abs(secondClick.y - firstClick.y);
+                    var top = Math.min(firstClick.y, secondClick.y);
+                    var left = Math.min(firstClick.x, secondClick.x);
+
+                    inputBox = [firstClick.x, firstClick.y, secondClick.x, secondClick.y];
+
+                    drawnBox.style.width = width + 'px';
+                    drawnBox.style.height = height + 'px';
+                    drawnBox.style.top = top + 'px';
+                    drawnBox.style.left = left + 'px';
+                    popupmap.appendChild(drawnBox);
+
+
+                    // Set firstClick and secondClick to null to be able to set a new box after 2nd mouse clicks
+                    firstClick = null;
+                    secondClick = null;
+                }
+            }
+        });
+
+        clearPrompts.addEventListener('click', function () {
+            // Removes the current prompts on the input image
+            var points = document.querySelectorAll('#popup-map .pointB');
+            points.forEach(function (point) {
+                point.remove();
+            });
+            points = document.querySelectorAll('#popup-map .pointR');
+            points.forEach(function (point) {
+                point.remove();
+            });
+            
+            pointsArray = [];
+            pointsLabel = []; 
+
+            if (drawnBox.parentNode === popupmap) {
+                popupmap.removeChild(drawnBox);
+                drawnBox = null;
+            }
+            inputBox = [-1,-1,-1,-1];
+        });
+
+
+        closeButton.addEventListener('click', function () {
+            // Close the popup when the close button is clicked
+            popupContainer.style.display = 'none';
+
+            if (currentBlobUrl) {
+                URL.revokeObjectURL(currentBlobUrl);
+                currentBlobUrl = null;
+            }
+
+            // Removes the current prompts on the input image
+            var points = document.querySelectorAll('#popup-map .pointB');
+            points.forEach(function (point) {
+                point.remove();
+            });
+            points = document.querySelectorAll('#popup-map .pointR');
+            points.forEach(function (point) {
+                point.remove();
+            });
+            
+            pointsArray = [];
+            pointsLabel = []; 
+
+            if (drawnBox.parentNode === popupmap) {
+                popupmap.removeChild(drawnBox);
+                drawnBox = null;
+            }
+            inputBox = [-1,-1,-1,-1];
+        });
+
+        // Close the QuickGuide when the close button is clicked
+        closeButton2.addEventListener('click', function () {
+            quickGuideContainer.style.display = 'none';
+
+            if (currentBlobUrl) {
+                URL.revokeObjectURL(currentBlobUrl);
+                currentBlobUrl = null;
+            }
+        });
+
+        downloadButton1.addEventListener('click', function () {
+            const a = document.createElement('a');
+            a.href = uploadedImage.src;
+            a.download = 'segmented_image.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        
+
+        downloadButton2.addEventListener('click', function () {
+            // Handle the logic for Download 2 here
+            console.log('Download 2 clicked');
+        });
+        
+        downloadButton2.addEventListener('click', downloadNpy);
+
+        function downloadNpy() {
+            // downloads the mask and image as npy
+            fetch('http://localhost:8082/download_npy')
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'OUTPUTimage.npy';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    // After downloading the first file, download the second file
+                    fetch('http://localhost:8082/download_mask_npy')
+                        .then(maskResponse => maskResponse.blob())
+                        .then(maskBlob => {
+                            const maskUrl = window.URL.createObjectURL(new Blob([maskBlob]));
+                            const maskA = document.createElement('a');
+                            maskA.href = maskUrl;
+                            maskA.download = 'OUTPUTmask.npy';
+                            document.body.appendChild(maskA);
+                            maskA.click();
+                            document.body.removeChild(maskA);
+                        })
+                        .catch(error => console.error('Failed to download mask npy:', error));
+                })
+                .catch(error => console.error('Failed to download npy:', error));
+        }
+
+    </script>
+</body>
+
+</html>
