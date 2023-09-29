@@ -20,7 +20,7 @@ The Index.html represents the frontend. The following components were defined th
   - <em>closeButton2:</em> close QuickGuide window
   
 ## Backend of the application. 
-The app.py provides the following functions
+The app.py provides the following functions <br>
 Endpoints
 - <em>/seg_image/box:</em> segments an image with a box as prompt
 - <em>/seg_image/point:</em> segments an image with points as prompts
